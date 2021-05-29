@@ -199,6 +199,7 @@ def play(strategy0, strategy1, score0=0, score1=0, dice=six_sided,
         num_rolls = strategy(score,opponent)
         score +=take_turn(num_rolls, opponent,dice)
         score0, score1 = record_score(who)
+        say = say(score0,score1)
         if not(extra_turn(score,opponent)):
             who = other(who)
 
@@ -290,8 +291,17 @@ def announce_highest(who, last_score=0, running_high=0):
     30 point(s)! The most yet for Player 1
     """
     assert who == 0 or who == 1, 'The who argument should indicate a player.'
+
     # BEGIN PROBLEM 7
-    "*** YOUR CODE HERE ***"
+    def announce(score0,score1):
+        score = score0 if who == 0 else score1
+        dif_score = score - last_score
+        if dif_score > running_high:
+            print(dif_score,'point(s)! The most yet for Player',who)
+            return announce_highest(who,score,dif_score)
+        return announce_highest(who,score,running_high)
+    return announce
+
     # END PROBLEM 7
 
 
