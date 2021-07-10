@@ -22,7 +22,9 @@ def taxicab(a, b):
     >>> taxicab(ess_a_bagel, times_square)
     9
     """
-    "*** YOUR CODE HERE ***"
+    st_dis = abs(street(a)-street(b))
+    ave_dis = abs(avenue(a)-avenue(b))
+    return st_dis+ave_dis
 
 # Mobiles
 
@@ -68,12 +70,12 @@ def end(s):
 def weight(size):
     """Construct a weight of some size."""
     assert size > 0
-    "*** YOUR CODE HERE ***"
+    return ['weight',size]
 
 def size(w):
     """Select the size of a weight."""
     assert is_weight(w), 'must call size on a weight'
-    "*** YOUR CODE HERE ***"
+    return w[1]
 
 def is_weight(w):
     """Whether w is a weight."""
@@ -121,7 +123,19 @@ def balanced(m):
     >>> balanced(mobile(side(1, w), side(1, v)))
     False
     """
-    "*** YOUR CODE HERE ***"
+    if is_weight(m):
+        return True
+    else:
+        l_side , r_side = left(m) , right(m)
+        l_torque , r_torque = torque(l_side) , torque(r_side)
+        if l_torque != r_torque:
+            return False
+        else:
+            return balanced(end(l_side)) and balanced(end(r_side))
+
+
+def torque(side):
+    return length(side)*total_weight(end(side))
 
 def totals_tree(m):
     """Return a tree representing the mobile with its total weight at the root.
@@ -148,7 +162,14 @@ def totals_tree(m):
           3
           2
     """
-    "*** YOUR CODE HERE ***"
+
+    if is_weight(m):
+        return tree(size(m))
+    else:
+        side=[]
+        side.append(totals_tree(end(left(m))))
+        side.append(totals_tree(end(right(m))))
+        return tree(total_weight(m),side)
 
 def replace_leaf(t, old, new):
     """Returns a new tree where every leaf value equal to old has
@@ -179,7 +200,18 @@ def replace_leaf(t, old, new):
     >>> laerad == yggdrasil # Make sure original tree is unmodified
     True
     """
-    "*** YOUR CODE HERE ***"
+    if is_leaf(t):
+        if label(t) == old:
+            return tree(new)
+        else:
+            return t
+    if is_tree(t):
+        new_branch = []
+        for branch in branches(t):
+            new_branch.append(replace_leaf(branch,old,new))
+        return tree(label(t),new_branch)
+
+
 
 def make_fib():
     """Returns a function that returns the next Fibonacci number
@@ -204,7 +236,22 @@ def make_fib():
     >>> check(this_file, 'make_fib', ['List'])
     True
     """
-    "*** YOUR CODE HERE ***"
+    n = 0
+    def next_fib():
+        nonlocal n
+        result = fib(n)
+        n += 1
+        return result
+    return next_fib
+
+def fib(n):
+    if n == 0:
+        return 0
+    elif n ==1:
+        return 1
+    else:
+        return fib(n-1)+fib(n-2)
+
 
 def make_withdraw(balance, password):
     """Return a password-protected withdraw function.
@@ -234,7 +281,19 @@ def make_withdraw(balance, password):
     >>> type(w(10, 'l33t')) == str
     True
     """
-    "*** YOUR CODE HERE ***"
+    wrong_p = []
+    def withdraw(amount,typed):
+        nonlocal balance, password, wrong_p
+        if len(wrong_p) == 3:
+            return "Your account is locked. Attempts: %s" % str(wrong_p)
+        elif typed != password:
+            wrong_p.append(typed)
+            return 'Incorrect password'
+        if amount > balance:
+            return 'Insufficient funds'
+        balance = balance - amount
+        return balance
+    return withdraw
 
 def make_joint(withdraw, old_password, new_password):
     """Return a password-protected withdraw function that has joint access to
@@ -274,7 +333,14 @@ def make_joint(withdraw, old_password, new_password):
     >>> make_joint(w, 'hax0r', 'hello')
     "Your account is locked. Attempts: ['my', 'secret', 'password']"
     """
-    "*** YOUR CODE HERE ***"
+    check = withdraw(0,old_password)
+    if type(check) == str:
+        return check
+    def joint_withdraw(amount,typed):
+        if typed == new_password:
+            return withdraw(amount,old_password)
+        return withdraw(amount,typed)
+    return joint_withdraw
 
 
 
@@ -353,11 +419,11 @@ def interval(a, b):
 
 def lower_bound(x):
     """Return the lower bound of interval x."""
-    "*** YOUR CODE HERE ***"
+    return x[0]
 
 def upper_bound(x):
     """Return the upper bound of interval x."""
-    "*** YOUR CODE HERE ***"
+     return x[1]
 
 def str_interval(x):
     """Return a string representation of interval x.
@@ -374,11 +440,11 @@ def add_interval(x, y):
 def mul_interval(x, y):
     """Return the interval that contains the product of any value in x and any
     value in y."""
-    p1 = x[0] * y[0]
-    p2 = x[0] * y[1]
-    p3 = x[1] * y[0]
-    p4 = x[1] * y[1]
-    return [min(p1, p2, p3, p4), max(p1, p2, p3, p4)]
+    results=[]
+    for x in x:
+        for y in y:
+            results.append(x*y)
+    return interval(min(result), max(result))
 
 def sub_interval(x, y):
     """Return the interval that contains the difference between any value in x
